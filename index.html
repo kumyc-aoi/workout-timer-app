@@ -80,11 +80,20 @@
       width: auto;
       background: #888;
     }
+    .setup-ui {
+      display: block;
+    }
+    .workout-ui {
+      display: none;
+    }
+    .hidden {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
   <header>運動タイマー</header>
-  <div class="container">
+  <div class="container setup-ui" id="setup-ui">
     <div id="exercise-list"></div>
     <button onclick="addExercise()">+ 種目を追加</button>
     <input type="text" id="presetName" placeholder="マイセット名を入力">
@@ -92,6 +101,7 @@
     <select id="presetSelect"></select>
     <button onclick="loadPreset()">マイセット読込</button>
     <button onclick="startWorkout()">開始</button>
+  </div>  <div class="container workout-ui" id="workout-ui">
     <div class="status" id="status">未開始</div>
     <div class="countdown" id="countdown"></div>
   </div>  <script>
@@ -185,6 +195,9 @@
     }
 
     function startWorkout() {
+      document.getElementById("setup-ui").classList.add("hidden");
+      document.getElementById("workout-ui").classList.remove("hidden");
+
       const exercises = [];
       document.querySelectorAll(".exercise").forEach(ex => {
         const name = ex.querySelector(".name").value || "運動";
