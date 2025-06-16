@@ -1,95 +1,23 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>運動タイマー</title>
   <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f5f5f5;
-      color: #333;
-    }
-    header {
-      background: #4CAF50;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.5rem;
-    }
-    .container {
-      padding: 1rem;
-      max-width: 600px;
-      margin: auto;
-    }
-    .exercise {
-      background: white;
-      border-radius: 1rem;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      position: relative;
-    }
-    .exercise input {
-      width: 100%;
-      margin-top: 0.5rem;
-      margin-bottom: 1rem;
-      padding: 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 0.5rem;
-      font-size: 1rem;
-    }
-    button {
-      padding: 0.8rem 1rem;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 0.5rem;
-      font-size: 1rem;
-      margin-top: 0.5rem;
-      width: 100%;
-    }
-    .status {
-      font-size: 1.5rem;
-      text-align: center;
-      margin-top: 1rem;
-    }
-    .countdown {
-      font-size: 3rem;
-      text-align: center;
-      margin-top: 1rem;
-      font-weight: bold;
-    }
-    select {
-      width: 100%;
-      padding: 0.5rem;
-      border-radius: 0.5rem;
-      margin-top: 0.5rem;
-    }
-    .controls {
-      position: absolute;
-      top: 0.5rem;
-      right: 0.5rem;
-      display: flex;
-      gap: 0.3rem;
-    }
-    .controls button {
-      padding: 0.2rem 0.5rem;
-      font-size: 0.8rem;
-      width: auto;
-      background: #888;
-    }
-    .setup-ui {
-      display: block;
-    }
-    .workout-ui {
-      display: none;
-    }
-    .hidden {
-      display: none !important;
-    }
+    body { font-family: sans-serif; margin: 0; padding: 0; background: #f5f5f5; color: #333; }
+    header { background: #4CAF50; color: white; padding: 1rem; text-align: center; font-size: 1.5rem; }
+    .container { padding: 1rem; max-width: 600px; margin: auto; }
+    .exercise { background: white; border-radius: 1rem; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: relative; }
+    .exercise input, select { width: 100%; margin-top: 0.5rem; margin-bottom: 1rem; padding: 0.5rem; font-size: 1rem; border: 1px solid #ccc; border-radius: 0.5rem; }
+    button { padding: 0.8rem 1rem; background: #4CAF50; color: white; border: none; border-radius: 0.5rem; font-size: 1rem; margin-top: 0.5rem; width: 100%; }
+    .status { font-size: 2rem; text-align: center; margin-top: 1rem; }
+    .countdown { font-size: 4rem; text-align: center; margin-top: 1rem; font-weight: bold; }
+    .controls { position: absolute; top: 0.5rem; right: 0.5rem; display: flex; gap: 0.3rem; }
+    .controls button { padding: 0.2rem 0.5rem; font-size: 0.8rem; width: auto; background: #888; }
+    .setup-ui { display: block; }
+    .workout-ui { display: none; }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
@@ -98,7 +26,7 @@
   <div class="container setup-ui" id="setup-ui">
     <div id="exercise-list"></div>
     <button onclick="addExercise()">+ 種目を追加</button>
-    <input type="text" id="presetName" placeholder="マイセット名を入力">
+    <input type="text" id="presetName" placeholder="マイセット名を入力" />
     <button onclick="savePreset()">マイセットを保存</button>
     <select id="presetSelect"></select>
     <button onclick="loadPreset()">マイセット読込</button>
@@ -114,6 +42,12 @@
     function addExercise(data = {}, index = null) {
       const div = document.createElement("div");
       div.className = "exercise";
+
+      const name = data.name || "";
+      const time = data.time || "";
+      const rest = data.rest || "";
+      const sets = data.sets || "";
+
       div.innerHTML = `
         <div class="controls">
           <button onclick="moveUp(this)">↑</button>
@@ -121,14 +55,15 @@
           <button onclick="duplicateExercise(this)">複製</button>
         </div>
         <label>種目名</label>
-        <input type="text" class="name" placeholder="例：スクワット" value="${data.name || ''}">
+        <input type="text" class="name" value="${name}">
         <label>運動時間（秒）</label>
-        <input type="number" class="time" min="1" value="${data.time || ''}">
+        <input type="number" class="time" min="1" value="${time}">
         <label>インターバル時間（秒）</label>
-        <input type="number" class="rest" min="1" value="${data.rest || ''}">
+        <input type="number" class="rest" min="1" value="${rest}">
         <label>セット数</label>
-        <input type="number" class="sets" min="1" value="${data.sets || ''}">
+        <input type="number" class="sets" min="1" value="${sets}">
       `;
+
       const list = document.getElementById("exercise-list");
       if (index === null) list.appendChild(div);
       else list.insertBefore(div, list.children[index]);
@@ -136,16 +71,12 @@
 
     function moveUp(btn) {
       const item = btn.closest(".exercise");
-      if (item.previousElementSibling) {
-        item.parentNode.insertBefore(item, item.previousElementSibling);
-      }
+      if (item.previousElementSibling) item.parentNode.insertBefore(item, item.previousElementSibling);
     }
 
     function moveDown(btn) {
       const item = btn.closest(".exercise");
-      if (item.nextElementSibling) {
-        item.parentNode.insertBefore(item.nextElementSibling, item);
-      }
+      if (item.nextElementSibling) item.parentNode.insertBefore(item.nextElementSibling, item);
     }
 
     function duplicateExercise(btn) {
@@ -214,6 +145,13 @@
           exercises.push({ name, time, rest, sets });
         }
       });
+
+      if (exercises.length === 0) {
+        alert("セットが登録されていません！");
+        location.reload();
+        return;
+      }
+
       runWorkout(exercises);
     }
 
@@ -221,21 +159,25 @@
       let i = 0, j = 1;
       const status = document.getElementById("status");
       const countdown = document.getElementById("countdown");
-      const beep = (url) => new Audio(url).play();
-      const normalBeep = 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg';
-      const softBeep = 'https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg';
+      const beepURL = 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg';
+
+      function playBeep(volume = 1.0) {
+        const audio = new Audio(beepURL);
+        audio.volume = volume;
+        audio.play();
+      }
 
       function countdownTimer(seconds, label, callback) {
         let time = seconds;
         status.textContent = label;
         countdown.textContent = time;
-        if (time > 1) setTimeout(() => beep(softBeep), (time - 1) * 1000);
+        if (time > 1) setTimeout(() => playBeep(0.3), (time - 1) * 1000);
         const interval = setInterval(() => {
           time--;
           countdown.textContent = time;
           if (time <= 0) {
             clearInterval(interval);
-            beep(normalBeep);
+            playBeep(1.0);
             callback();
           }
         }, 1000);
