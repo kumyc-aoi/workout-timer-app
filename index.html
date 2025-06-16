@@ -1,0 +1,156 @@
+<!DOCTYPE html><html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>運動タイマー</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      color: #333;
+    }
+    header {
+      background: #4CAF50;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+    }
+    .container {
+      padding: 1rem;
+      max-width: 600px;
+      margin: auto;
+    }
+    .exercise {
+      background: white;
+      border-radius: 1rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .exercise input {
+      width: 100%;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+    }
+    button {
+      padding: 0.8rem 1rem;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      margin-top: 0.5rem;
+      width: 100%;
+    }
+    .status {
+      font-size: 1.2rem;
+      text-align: center;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>運動タイマー</header>
+  <div class="container">
+    <div id="exercise-list"></div>
+    <button onclick="addExercise()">+ 種目を追加</button>
+    <button onclick="saveExercises()">設定を保存</button>
+    <button onclick="loadExercises()">設定を読み込み</button>
+    <button onclick="startWorkout()">開始</button>
+    <div class="status" id="status">未開始</div>
+  </div>  <script>
+    function addExercise(data = {}) {
+      const div = document.createElement("div");
+      div.className = "exercise";
+      div.innerHTML = `
+        <label>種目名</label>
+        <input type="text" class="name" placeholder="例：スクワット" value="${data.name || ''}">
+        <label>運動時間（秒）</label>
+        <input type="number" class="time" min="1" value="${data.time || ''}">
+        <label>インターバル時間（秒）</label>
+        <input type="number" class="rest" min="1" value="${data.rest || ''}">
+        <label>セット数</label>
+        <input type="number" class="sets" min="1" value="${data.sets || ''}">
+      `;
+      document.getElementById("exercise-list").appendChild(div);
+    }
+
+    function saveExercises() {
+      const exercises = [];
+      document.querySelectorAll(".exercise").forEach(ex => {
+        exercises.push({
+          name: ex.querySelector(".name").value,
+          time: ex.querySelector(".time").value,
+          rest: ex.querySelector(".rest").value,
+          sets: ex.querySelector(".sets").value,
+        });
+      });
+      localStorage.setItem("exerciseData", JSON.stringify(exercises));
+      alert("設定を保存しました");
+    }
+
+    function loadExercises() {
+      const saved = localStorage.getItem("exerciseData");
+      if (!saved) return;
+      document.getElementById("exercise-list").innerHTML = '';
+      JSON.parse(saved).forEach(ex => addExercise(ex));
+    }
+
+    function startWorkout() {
+      const exercises = [];
+      document.querySelectorAll(".exercise").forEach(ex => {
+        const name = ex.querySelector(".name").value || "運動";
+        const time = parseInt(ex.querySelector(".time").value);
+        const rest = parseInt(ex.querySelector(".rest").value);
+        const sets = parseInt(ex.querySelector(".sets").value);
+        if (!isNaN(time) && !isNaN(rest) && !isNaN(sets)) {
+          exercises.push({ name, time, rest, sets });
+        }
+      });
+      runWorkout(exercises);
+    }
+
+    function runWorkout(sequence) {
+      let i = 0, j = 1;
+      const status = document.getElementById("status");
+      const beep = (url) => new Audio(url).play();
+      const normalBeep = 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg';
+      const softBeep = 'https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg';
+
+      function nextPhase() {
+        if (i >= sequence.length) {
+          status.textContent = "終了！お疲れ様でした！";
+          return;
+        }
+        const ex = sequence[i];
+        if (j > ex.sets) {
+          i++;
+          j = 1;
+          return nextPhase();
+        }
+        status.textContent = `${ex.name} ${j}/${ex.sets}`;
+        setTimeout(() => beep(softBeep), (ex.time - 1) * 1000);
+        beep(normalBeep);
+        setTimeout(() => {
+          status.textContent = `インターバル ${j}/${ex.sets}`;
+          setTimeout(() => beep(softBeep), (ex.rest - 1) * 1000);
+          beep(normalBeep);
+          setTimeout(() => {
+            j++;
+            nextPhase();
+          }, ex.rest * 1000);
+        }, ex.time * 1000);
+      }
+      nextPhase();
+    }
+
+    window.onload = loadExercises;
+  </script></body>
+</html>
