@@ -1,53 +1,99 @@
-<!DOCTYPE html>
-<html lang="ja">
+<!DOCTYPE html><html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>運動タイマー</title>
   <style>
-    body { font-family: sans-serif; margin: 0; padding: 0; background: #f5f5f5; color: #333; }
-    header { background: #4CAF50; color: white; padding: 1rem; text-align: center; font-size: 1.5rem; }
-    .container { padding: 1rem; max-width: 600px; margin: auto; }
-    .exercise { background: white; border-radius: 1rem; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: relative; }
-    .exercise input, select { width: 100%; margin-top: 0.5rem; margin-bottom: 1rem; padding: 0.5rem; font-size: 1rem; border: 1px solid #ccc; border-radius: 0.5rem; }
-    button { padding: 0.8rem 1rem; background: #4CAF50; color: white; border: none; border-radius: 0.5rem; font-size: 1rem; margin-top: 0.5rem; width: 100%; }
-    .status { font-size: 2rem; text-align: center; margin-top: 1rem; }
-    .countdown { font-size: 4rem; text-align: center; margin-top: 1rem; font-weight: bold; }
-    .controls { position: absolute; top: 0.5rem; right: 0.5rem; display: flex; gap: 0.3rem; }
-    .controls button { padding: 0.2rem 0.5rem; font-size: 0.8rem; width: auto; background: #888; }
-    .setup-ui { display: block; }
-    .workout-ui { display: none; }
-    .hidden { display: none !important; }
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      color: #333;
+    }
+    header {
+      background: #4CAF50;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+    }
+    .container {
+      padding: 1rem;
+      max-width: 600px;
+      margin: auto;
+    }
+    .exercise {
+      background: white;
+      border-radius: 1rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .exercise input {
+      width: 100%;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+    }
+    .controls {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      display: flex;
+      gap: 0.3rem;
+    }
+    .controls button {
+      padding: 0.3rem 0.5rem;
+      font-size: 0.8rem;
+      background: #888;
+      color: white;
+      border: none;
+      border-radius: 0.3rem;
+    }
+    button {
+      padding: 0.8rem 1rem;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      margin-top: 0.5rem;
+      width: 100%;
+    }
+    .status {
+      font-size: 2rem;
+      text-align: center;
+      margin-top: 1rem;
+    }
+    .countdown {
+      font-size: 4rem;
+      text-align: center;
+      margin-top: 0.5rem;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <header>運動タイマー</header>
-
-  <div class="container setup-ui" id="setup-ui">
+  <div class="container">
+    <div class="status" id="status">未開始</div>
+    <div class="countdown" id="countdown"></div>
     <div id="exercise-list"></div>
     <button onclick="addExercise()">+ 種目を追加</button>
-    <input type="text" id="presetName" placeholder="マイセット名を入力" />
+    <input type="text" id="presetName" placeholder="マイセット名を入力">
     <button onclick="savePreset()">マイセットを保存</button>
     <select id="presetSelect"></select>
     <button onclick="loadPreset()">マイセット読込</button>
     <button onclick="startWorkout()">開始</button>
-  </div>
-
-  <div class="container workout-ui" id="workout-ui">
-    <div class="status" id="status">未開始</div>
-    <div class="countdown" id="countdown"></div>
-  </div>
-
-  <script>
-    function addExercise(data = {}, index = null) {
+  </div>  <script>
+    function addExercise(data = {}) {
       const div = document.createElement("div");
       div.className = "exercise";
-
-      const name = data.name || "";
-      const time = data.time || "";
-      const rest = data.rest || "";
-      const sets = data.sets || "";
-
       div.innerHTML = `
         <div class="controls">
           <button onclick="moveUp(this)">↑</button>
@@ -55,18 +101,15 @@
           <button onclick="duplicateExercise(this)">複製</button>
         </div>
         <label>種目名</label>
-        <input type="text" class="name" value="${name}">
+        <input type="text" class="name" placeholder="例：スクワット" value="${data.name || ''}">
         <label>運動時間（秒）</label>
-        <input type="number" class="time" min="1" value="${time}">
+        <input type="number" class="time" min="1" value="${data.time || ''}">
         <label>インターバル時間（秒）</label>
-        <input type="number" class="rest" min="1" value="${rest}">
+        <input type="number" class="rest" min="1" value="${data.rest || ''}">
         <label>セット数</label>
-        <input type="number" class="sets" min="1" value="${sets}">
+        <input type="number" class="sets" min="1" value="${data.sets || ''}">
       `;
-
-      const list = document.getElementById("exercise-list");
-      if (index === null) list.appendChild(div);
-      else list.insertBefore(div, list.children[index]);
+      document.getElementById("exercise-list").appendChild(div);
     }
 
     function moveUp(btn) {
@@ -87,8 +130,7 @@
         rest: item.querySelector(".rest").value,
         sets: item.querySelector(".sets").value,
       };
-      const index = Array.from(item.parentNode.children).indexOf(item) + 1;
-      addExercise(data, index);
+      addExercise(data);
     }
 
     function savePreset() {
@@ -106,7 +148,6 @@
       const all = JSON.parse(localStorage.getItem("myPresets") || '{}');
       all[name] = exercises;
       localStorage.setItem("myPresets", JSON.stringify(all));
-      alert("保存しました");
       updatePresetList();
     }
 
@@ -132,9 +173,6 @@
     }
 
     function startWorkout() {
-      document.getElementById("setup-ui").classList.add("hidden");
-      document.getElementById("workout-ui").classList.remove("hidden");
-
       const exercises = [];
       document.querySelectorAll(".exercise").forEach(ex => {
         const name = ex.querySelector(".name").value || "運動";
@@ -145,13 +183,6 @@
           exercises.push({ name, time, rest, sets });
         }
       });
-
-      if (exercises.length === 0) {
-        alert("セットが登録されていません！");
-        location.reload();
-        return;
-      }
-
       runWorkout(exercises);
     }
 
@@ -195,7 +226,7 @@
           j = 1;
           return nextPhase();
         }
-        countdownTimer(ex.time, `${ex.name} ${j}/${ex.sets}`, () => {
+        countdownTimer(ex.time, `${ex.name} ${j}/${ex.sets}セット目`, () => {
           countdownTimer(ex.rest, `インターバル ${j}/${ex.sets}`, () => {
             j++;
             nextPhase();
@@ -207,6 +238,5 @@
     }
 
     window.onload = updatePresetList;
-  </script>
-</body>
+  </script></body>
 </html>
